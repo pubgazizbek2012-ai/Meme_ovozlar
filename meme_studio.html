@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Meme & Shorts Ovoz Studiyasi</title>
+    <style>
+        body {
+            background-color: #0f1020;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: #1b1b3a;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 2px solid #e94560;
+        }
+        h1 {
+            color: #ff4757;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #a4b0be;
+            font-size: 13px;
+        }
+        .video-selector {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .vid-btn {
+            background-color: #16213e;
+            color: white;
+            border: 2px solid #0f3460;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .vid-btn.active {
+            background-color: #e94560;
+            border-color: #ff4757;
+        }
+        .video-box {
+            background: #0f1020;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border: 2px solid #533483;
+        }
+        video {
+            width: 100%;
+            max-height: 220px;
+            border-radius: 8px;
+            background: #000;
+        }
+        .studio-controls {
+            background: #0f1020;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px dashed #2ed573;
+        }
+        button.action-btn {
+            background-color: #2ed573;
+            color: #0f1020;
+            border: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            margin: 5px;
+        }
+        button.action-btn:hover {
+            background-color: #26af5f;
+        }
+        button.stop-btn {
+            background-color: #ff4757;
+            color: white;
+        }
+        #status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #ffa502;
+            font-weight: bold;
+        }
+        audio {
+            margin-top: 15px;
+            width: 100%;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎬 Mega Video & Shorts Ovoz Studiyasi 🎤</h1>
+        <p>Har bir bo'lim o'zining maxsus videosiga ega. Tanlang va ovoz bering!</p>
+
+        <!-- Kategoriya tugmalari -->
+        <div class="video-selector">
+            <button class="vid-btn active" onclick="selectVideo('harry', this)">⚡ Garri Potter</button>
+            <button class="vid-btn" onclick="selectVideo('shrek', this)">🧅 Shrek</button>
+            <button class="vid-btn" onclick="selectVideo('anime', this)">🌸 Anime</button>
+            <button class="vid-btn" onclick="selectVideo('meme', this)">🔥 Meme / Shorts</button>
+        </div>
+
+        <!-- Video ko'rsatish qismi -->
+        <div class="video-box">
+            <video id="media-video" controls>
+                <source id="video-source" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+                Brauzeringiz videoni qo'llab-quvvatlamaydi.
+            </video>
+            <div id="video-title" style="margin-top: 10px; font-weight: bold; color: #2ed573;">Tanlangan: Garri Potter lavhasi</div>
+        </div>
+
+        <!-- Mikrofon boshqaruvi -->
+        <div class="studio-controls">
+            <button class="action-btn" id="record-btn" onclick="toggleRecording()">🔴 Videoga Ovoz Yozish</button>
+            <div id="status">Mikrofon tayyor...</div>
+            <audio id="audio-playback" controls class="hidden"></audio>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        // Har bir bo'lim uchun turli xil ochiq video havolalari
+        const videoLinks = {
+            harry: {
+                url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                title: "Tanlangan: Garri Potter lavhasi"
+            },
+            shrek: {
+                url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+                title: "Tanlangan: Shrek lavhasi"
+            },
+            anime: {
+                url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+                title: "Tanlangan: Anime lavhasi"
+            },
+            meme: {
+                url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+                title: "Tanlangan: Meme / Shorts lavhasi"
+            }
+        };
+
+        function selectVideo(type, element) {
+            document.querySelectorAll('.vid-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+
+            const videoElem = document.getElementById("media-video");
+            const sourceElem = document.getElementById("video-source");
+            const titleElem = document.getElementById("video-title");
+
+            let target = videoLinks[type];
+            sourceElem.src = target.url;
+            titleElem.innerText = target.title;
+            videoElem.load(); // Videoni yangilash
+        }
+
+        async function toggleRecording() {
+            const recordBtn = document.getElementById("record-btn");
+            const status = document.getElementById("status");
+            const audioPlayback = document.getElementById("audio-playback");
+            const videoElem = document.getElementById("media-video");
+
+            if (!isRecording) {
+                try {
+                    videoElem.currentTime = 0;
+                    videoElem.play();
+
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayback.src = audioUrl;
+                        audioPlayback.classList.remove("hidden");
+                        
+                        status.innerHTML = `✨ Ovoz muvaffaqiyatli yozildi va video bilan moslandi!`;
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.innerText = "⏹️ Yozishni To'xtatish";
+                    recordBtn.classList.add("stop-btn");
+                    status.innerHTML = "🎙️ Video ketmoqda, gapiring...";
+                    audioPlayback.classList.add("hidden");
+
+                } catch (err) {
+                    alert("Mikrofonga ruxsat berilmadi! (Faylni brauzerga veb-server orqali oching yoki ruxsatni yoqing).");
+                    console.error(err);
+                }
+            } else {
+                mediaRecorder.stop();
+                videoElem.pause();
+                isRecording = false;
+                recordBtn.innerText = "🔴 Qaytadan Ovoz Yozish";
+                recordBtn.classList.remove("stop-btn");
+            }
+        }
+    </script>
+</body>
+</html>
